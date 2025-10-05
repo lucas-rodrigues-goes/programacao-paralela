@@ -41,7 +41,7 @@ int main(void){
 	int lista_length = sizeof(lista) / sizeof(lista[0]);
 	int i = 0;
 	while (i < tam_lista) {
-		lista[i] = rand() % 10;
+		lista[i] = (rand() % 100) * 134718;
 		//printf("Número %d adicionado a lista.\n", lista[i]);
 		i = i + 1;
 	}
