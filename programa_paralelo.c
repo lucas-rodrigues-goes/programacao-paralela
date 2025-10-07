@@ -5,8 +5,9 @@
 #include <pthread.h>
 
 // Definições
-int lista[18];
+int lista[100];
 int num_threads = 6;
+bool exibir = false;
 
 // Funções de ajuda
 void mostra_lista (int lista[], int length) {
@@ -54,8 +55,10 @@ int main(void){
 	for (int i = 0; i < lista_length; i++) {
 		lista[i] = (rand() % 100) * 134718;
 	}
-	printf("Lista original:   ");
-	mostra_lista(lista, lista_length);
+	if (exibir) {
+		printf("Lista original:   ");
+		mostra_lista(lista, lista_length);
+	}
 
 	// Inicialização threads
 	pthread_t threads[num_threads];
@@ -71,8 +74,10 @@ int main(void){
 	}
 
 	// Exibir novos valores da lista
-	printf("Lista atualizada: ");
-	mostra_lista(lista, lista_length);
+	if (exibir) {
+		printf("Lista atualizada: ");
+		mostra_lista(lista, lista_length);
+	}
 
 	// Fim captura de tempo
 	gettimeofday(&t2, NULL);
