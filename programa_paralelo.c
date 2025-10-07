@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 // Definições
 int lista[18];
+int num_threads = 6;
 
 // Funções de ajuda
 void mostra_lista (int lista[], int length) {
@@ -31,6 +33,15 @@ int prox_primo (int numero) {
 	}
 }
 
+// Função de substituição (a ser executada pela thread)
+void* atualiza_lista (void* arg) {
+	int id = *(int*)arg;
+	int lista_length = sizeof(lista) / sizeof(lista[0]);
+	for (int i = id; i < lista_length; i += num_threads) {
+		lista[i] = prox_primo(lista[i]);
+	}
+}
+
 int main(void){
 	struct timeval t1, t2;
 	srand(time(NULL));
@@ -38,7 +49,7 @@ int main(void){
 	// Inicio captura de tempo
 	gettimeofday(&t1, NULL);
 
-	// Criação da Lista com números aleatórios
+	// Inicia números aleatórios na lista
 	int lista_length = sizeof(lista) / sizeof(lista[0]);
 	for (int i = 0; i < lista_length; i++) {
 		lista[i] = (rand() % 100) * 134718;
@@ -46,10 +57,20 @@ int main(void){
 	printf("Lista original:   ");
 	mostra_lista(lista, lista_length);
 
-	// Substituição dos valores da lista pelos seus próximos primos
-	for (int i = 0; i < lista_length; i++) {
-		lista[i] = prox_primo(lista[i]);
+	// Inicialização threads
+	pthread_t threads[num_threads];
+	int tid[num_threads];
+	for (int i = 0; i < num_threads; i++) {
+		tid[i] = i;
+		pthread_create(&threads[i], NULL, atualiza_lista, &tid[i]);
 	}
+	
+	// Finalização sincronizada das threads
+	for (int i = 0; i < num_threads; i++) {
+		pthread_join(threads[i], NULL);
+	}
+
+	// Exibir novos valores da lista
 	printf("Lista atualizada: ");
 	mostra_lista(lista, lista_length);
 
