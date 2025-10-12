@@ -130,6 +130,11 @@ void pool_run(pool* p, void (*function)(void*), void* arg) {
 // Shutdown
 void pool_shutdown(pool* p) {
     pthread_mutex_lock(&p->queue.mutex);
+
+    while (p->queue.count > 0) {
+        pthread_cond_wait(&p->queue.not_full, &p->queue.mutex);
+    }
+
     p->stop = true;
     pthread_cond_broadcast(&p->queue.not_empty);
     pthread_mutex_unlock(&p->queue.mutex);
@@ -169,8 +174,6 @@ int main() {
     for (int i = 0; i < 6; i++) {
         pool_run(&my_pool, print_message, msgs[i]);
     }
-
-    sleep(10); // let tasks finish
 
     pool_shutdown(&my_pool);
     return 0;
