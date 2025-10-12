@@ -6,7 +6,7 @@
 
 // Definições
 int lista[100];
-int num_threads = 6;
+int num_threads = 24;
 bool exibir = false;
 
 // Funções de ajuda
