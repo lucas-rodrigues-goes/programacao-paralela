@@ -47,11 +47,6 @@ int main(void){
 	// Inicio captura de tempo
 	gettimeofday(&t1, NULL);
 
-	// Criação Pool de Threads
-	pool thread_pool;
-	pool_init(&thread_pool, num_threads, 100);
-	int args[100];
-
 	// Criação da Lista com números aleatórios
 	int lista_length = sizeof(lista) / sizeof(lista[0]);
 	for (int i = 0; i < lista_length; i++) {
@@ -61,6 +56,11 @@ int main(void){
 		printf("Lista original:   ");
 		mostra_lista(lista, lista_length);
 	}
+
+	// Criação Pool de Threads
+	pool thread_pool;
+	pool_init(&thread_pool, num_threads, lista_length);
+	int args[lista_length];
 
 	// Substituição dos valores da lista pelos seus próximos primos
 	for (int i = 0; i < lista_length; i++) {
