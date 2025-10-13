@@ -1,4 +1,8 @@
-#### Introdução
+# Programação Paralela em C
+
+
+
+## Introdução
 
 
 
@@ -10,7 +14,7 @@ A versão Biblioteca, utiliza uma implementação de pool de threads, que cria u
 
 
 
-#### Execução
+## Execução
 
 
 
