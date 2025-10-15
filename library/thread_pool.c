@@ -90,13 +90,11 @@ void* pool_worker(void* arg) {
             break;
         }
 
-        // Remove a tarefa da queue
-        task t = p->queue.queue[p->queue.head];
-        p->queue.head = (p->queue.head + 1) % p->queue.capacity;
-        p->queue.count--;
+        // Destrava a fila
+        pthread_mutex_unlock(&p->queue.mutex);
 
-        pthread_cond_signal(&p->queue.not_full); // Sinaliza que a queue não está cheia
-        pthread_mutex_unlock(&p->queue.mutex); // Libera mutex
+        // Remove a tarefa da queue
+        task t = task_queue_pop(&p->queue);
 
         // Executa a tarefa fora do lock
         t.function(t.arg);
