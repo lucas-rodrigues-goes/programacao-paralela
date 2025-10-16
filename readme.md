@@ -1,39 +1,27 @@
-# Programação Paralela em C
+# Parallel Programming in C
 
+## Introduction
 
+In this project, three execution versions were created to solve the same problem: given a list of size **N** filled with randomly generated numbers, a function is executed on all values of this list, replacing each item with the next prime number.
 
-## Introdução
+The **sequential version** simply iterates over the list, executing the next-prime calculation function on each element. The **parallel version** splits the list into equal parts among multiple threads, and each thread processes a fraction of the list.
 
+The **library version** uses a thread pool implementation, which provides a higher-level programming interface for assigning tasks to threads.
 
+## Execution
 
-No projeto foram criadas 3 versões de execução para a resolução de um mesmo problema, onde dado uma lista de tamanho N preenchida com números aleatoriamente gerados, uma função é executada sobre todos os valores desta lista substituindo seus itens pelo próximo valor primo.
+Below are the compilation instructions using GCC for each version.
 
-A versão sequencial simplesmente percorre a lista executando a função de calculo de próximo primo em cada um dos elementos, a versão paralela divide a lista em partes iguais entre diversas threads, e cada thread percorre uma fração da lista.
+######
 
-A versão Biblioteca, utiliza uma implementação de pool de threads, que cria uma interface de programação de nível mais alto para a atribuição de tarefas às threads.
+###### Sequential Program
 
+* `gcc linear_program.c -o linear_program`
 
+###### Parallel Program
 
-## Execução
+* `gcc parallel_program.c -o parallel_program`
 
+###### Library Program (Thread Pool)
 
-
-Abaixo seguem as instruções de compilação utilizando GCC para cada uma das versões.
-
-###### 
-
-###### Programa Sequencial
-
-* gcc programa\_sequencial.c -o programa\_sequencial
-
-
-
-###### Programa Paralelo
-
-* gcc programa\_paralelo.c -o programa\_paralelo
-
-
-
-###### Programa Biblioteca (Pool de threads)
-
-* gcc programa\_biblioteca.c library/thread\_pool.o -o programa\_biblioteca -lpthread
+* `gcc pool_program.c library/thread_pool.o -o pool_program -lpthread`

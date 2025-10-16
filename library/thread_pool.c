@@ -9,9 +9,9 @@
 //==================================
 
 // Init
-// Inicializa a estrutura de fila de tarefas
+// Initializes the task queue structure
 void task_queue_init(task_queue* q, int capacity) {
-    q->queue = calloc(capacity, sizeof(task)); // Aloca memória para a queue
+    q->queue = calloc(capacity, sizeof(task)); // Allocate memory for the queue
     q->capacity = capacity;
     q->head = 0;
     q->tail = 0;
@@ -20,51 +20,51 @@ void task_queue_init(task_queue* q, int capacity) {
     // Mutex
     pthread_mutex_init(&q->mutex, NULL);
 
-    // Sinalizadores
+    // Condition variables
     pthread_cond_init(&q->not_empty, NULL);
     pthread_cond_init(&q->not_full, NULL);
 }
 
 // Push
-// Insere uma tarefa na queue (espera se estiver cheia)
+// Inserts a task into the queue (waits if full)
 void task_queue_push(task_queue* q, task t) {
-    // Bloqueia acesso a fila (por outras threads)
+    // Lock queue access (for other threads)
     pthread_mutex_lock(&q->mutex);
 
-    // Aguarda sinalização de fila não cheia
+    // Wait for signal that queue is not full
     while (q->count == q->capacity) {
         pthread_cond_wait(&q->not_full, &q->mutex);
     }
 
-    q->queue[q->tail] = t; // Insere tarefa na posição final
-    q->tail = (q->tail + 1) % q->capacity; // Avança o índice circularmente
+    q->queue[q->tail] = t; // Insert task at the end
+    q->tail = (q->tail + 1) % q->capacity; // Advance index circularly
     q->count++;
 
-    // Sinaliza que a fila não está vazia e destrava o acesso
+    // Signal that queue is not empty and unlock access
     pthread_cond_signal(&q->not_empty);
     pthread_mutex_unlock(&q->mutex);
 }
 
 // Pop
-// Remove e retorna uma tarefa da queue (espera se estiver vazia)
+// Removes and returns a task from the queue (waits if empty)
 task task_queue_pop(task_queue* q) {
-    // Bloqueia acesso a fila (por outras threads)
+    // Lock queue access (for other threads)
     pthread_mutex_lock(&q->mutex);
 
-    // Aguarda sinalização de fila não vazia
+    // Wait for signal that queue is not empty
     while (q->count == 0) {
         pthread_cond_wait(&q->not_empty, &q->mutex);
     }
 
-    task t = q->queue[q->head]; // Obtém a tarefa da posição inicial
-    q->head = (q->head + 1) % q->capacity; // Avança índice circularmente
+    task t = q->queue[q->head]; // Get task from the front
+    q->head = (q->head + 1) % q->capacity; // Advance index circularly
     q->count--;
 
-    // Sinaliza que a fila não está cheia e destrava o acesso
+    // Signal that queue is not full and unlock access
     pthread_cond_signal(&q->not_full);
     pthread_mutex_unlock(&q->mutex);
 
-    return t; // Retorna a tarefa
+    return t; // Return the task
 }
 
 //==================================
@@ -72,31 +72,31 @@ task task_queue_pop(task_queue* q) {
 //==================================
 
 // Worker
-// Função executada por cada thread (trabalhador) do pool
+// Function executed by each pool thread (worker)
 void* pool_worker(void* arg) {
     pool* p = (pool*)arg;
 
     while (true) {
-        pthread_mutex_lock(&p->queue.mutex);   // Protege acesso à queue
+        pthread_mutex_lock(&p->queue.mutex);   // Protect access to queue
 
-        // Aguarda enquanto não há tarefas e o pool não está sendo encerrado
+        // Wait while there are no tasks and pool is not stopping
         while (p->queue.count == 0 && !p->stop) {
             pthread_cond_wait(&p->queue.not_empty, &p->queue.mutex);
         }
 
-        // Sai do loop se o pool estiver parando e não houver mais tarefas
+        // Exit loop if pool is stopping and no more tasks
         if (p->stop && p->queue.count == 0) {
             pthread_mutex_unlock(&p->queue.mutex);
             break;
         }
 
-        // Destrava a fila
+        // Unlock the queue
         pthread_mutex_unlock(&p->queue.mutex);
 
-        // Remove a tarefa da queue
+        // Remove the task from the queue
         task t = task_queue_pop(&p->queue);
 
-        // Executa a tarefa fora do lock
+        // Execute the task outside the lock
         t.function(t.arg);
     }
 
@@ -104,51 +104,51 @@ void* pool_worker(void* arg) {
 }
 
 // Init
-// Inicializa o thread pool
+// Initializes the thread pool
 void pool_init(pool* target_pool, int thread_count, int queue_capacity) {
     target_pool->size = thread_count;
-    target_pool->threads = calloc(thread_count, sizeof(pthread_t)); // Aloca vetor de threads
+    target_pool->threads = calloc(thread_count, sizeof(pthread_t)); // Allocate thread array
     target_pool->stop = false;
-    task_queue_init(&target_pool->queue, queue_capacity); // Inicializa a queue de tarefas
+    task_queue_init(&target_pool->queue, queue_capacity); // Initialize task queue
 
-    // Cria threads e associa a função worker
+    // Create threads and associate worker function
     for (int i = 0; i < thread_count; i++) {
         pthread_create(&target_pool->threads[i], NULL, pool_worker, target_pool);
     }
 }
 
 // Run
-// Adiciona uma nova tarefa ao pool
+// Adds a new task to the pool
 void pool_run(pool* p, void (*function)(void*), void* arg) {
-    if (p->stop) {  // Se o pool já foi desligado, não permite novas tarefas
+    if (p->stop) {  // If pool has been shut down, no more tasks allowed
         printf("Can't add more tasks to pool after it has been shutdown");
         return;
     }
 
-    task t = { function, arg }; // Cria tarefa
-    task_queue_push(&p->queue, t); // Adiciona na queue
+    task t = { function, arg }; // Create task
+    task_queue_push(&p->queue, t); // Add to queue
 }
 
 // Shutdown
-// Encerra o pool, aguardando todas as tarefas concluírem
+// Shuts down the pool, waiting for all tasks to finish
 void pool_shutdown(pool* p) {
     pthread_mutex_lock(&p->queue.mutex);
 
-    // Aguarda a queue ficar vazia antes de parar
+    // Wait for queue to become empty before stopping
     while (p->queue.count > 0) {
         pthread_cond_wait(&p->queue.not_full, &p->queue.mutex);
     }
 
-    p->stop = true; // Sinaliza Pool para não receber mais tarefas
-    pthread_cond_broadcast(&p->queue.not_empty); // Desbloqueia threads em espera
+    p->stop = true; // Signal pool to stop receiving tasks
+    pthread_cond_broadcast(&p->queue.not_empty); // Unlock waiting threads
     pthread_mutex_unlock(&p->queue.mutex);
 
-    // Aguarda todas as threads terminarem
+    // Wait for all threads to finish
     for (int i = 0; i < p->size; i++) {
         pthread_join(p->threads[i], NULL);
     }
 
-    // Libera memória e destrói mutex/condições
+    // Free memory and destroy mutex/conditions
     free(p->threads);
     free(p->queue.queue);
     pthread_mutex_destroy(&p->queue.mutex);
