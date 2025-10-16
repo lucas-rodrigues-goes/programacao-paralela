@@ -1,8 +1,6 @@
 # Thread Pool
 
-## 1. Thread Pool Implementation
-
-### Thread Pool
+## Implementation
 
 The thread pool manages multiple worker threads that execute tasks from a queue.
 
@@ -44,12 +42,12 @@ This implementation provides a safe and efficient foundation for parallel task e
 
 ---
 
-## 2. Program Versions Execution
+## Examples
 
 In the project, three execution versions were created to solve the same problem. Given a list of size **N**, filled with random numbers, a function is applied to all values in the list, replacing each element with the next prime number.
 
-* The **sequential version** iterates over the list, executing the next-prime calculation function on each element.
-* The **parallel version** splits the list into equal parts among multiple threads, and each thread processes a fraction of the list.
+* The **sequential version** iterates over the list, executing the next-prime calculation function on each element. (Does not use Thread Pool)
+* The **parallel version** splits the list into equal parts among multiple threads, and each thread processes a fraction of the list. (Does not use Thread Pool)
 * The **library version** uses the **Thread Pool** implemented as described above.
 * the **future version** shows an example where the result from a task is later retrieved using futures.
 
