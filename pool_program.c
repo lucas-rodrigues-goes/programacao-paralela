@@ -36,7 +36,7 @@ int next_prime(int number) {
 }
 
 // Main task function for the thread pool
-void next_prime_list(void* arg) {
+void* next_prime_list(void* arg) {
     int position = *(int*)arg;
     list[position] = next_prime(list[position]);
 }
@@ -66,7 +66,7 @@ int main(void){
     // Replace list values with their next primes
     for (int i = 0; i < list_length; i++) {
         args[i] = i;
-        pool_run(&thread_pool, next_prime_list, &args[i]);
+        pool_run(&thread_pool, next_prime_list, &args[i], true);
     }
     
     // Wait for all tasks to finish

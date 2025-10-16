@@ -21,7 +21,7 @@ The thread pool manages multiple worker threads that execute tasks from a queue.
 
 **Adding Tasks (`pool_run`)**
 
-* Creates a `task` structure with the provided function and argument.
+* Creates a `task` structure with the provided function and argument this task can also behave as a future.
 * Adds the task to the queue using `task_queue_push`.
 * If the pool is already shut down, no new tasks are allowed.
 
@@ -51,6 +51,7 @@ In the project, three execution versions were created to solve the same problem.
 * The **sequential version** iterates over the list, executing the next-prime calculation function on each element.
 * The **parallel version** splits the list into equal parts among multiple threads, and each thread processes a fraction of the list.
 * The **library version** uses the **Thread Pool** implemented as described above.
+* the **future version** shows an example where the result from a task is later retrieved using futures.
 
 Below are the compilation instructions using **GCC** for each version:
 
@@ -70,4 +71,10 @@ gcc parallel_program.c -o parallel_program
 
 ```bash
 gcc pool_program.c library/thread_pool.o -o pool_program -lpthread
+```
+
+### Future Program (Thread Pool)
+
+```bash
+gcc future_program.c library/thread_pool.o -o future_program -lpthread
 ```

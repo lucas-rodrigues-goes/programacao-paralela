@@ -5,18 +5,29 @@
 #include <stdbool.h>
 
 //==================================
-// Task
+// Future / Task
 //==================================
-typedef struct {
-    void (*function)(void*);
+typedef struct future {
+    void* (*function)(void*);
     void* arg;
-} task;
+    void* result;
+    bool ready;
+    bool temporary;         // new flag
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+} future;
+
+// Init
+void future_init(future* f, void* (*function)(void*), void* arg, bool temporary);
+
+// Get
+void* future_get(future* f);
 
 //==================================
 // Task Queue
 //==================================
 typedef struct {
-    task* queue;
+    future** queue;
     int capacity;
     int head;
     int tail;
@@ -26,17 +37,17 @@ typedef struct {
     pthread_cond_t not_full;
 } task_queue;
 
-// Initialize task queue
+// Init
 void task_queue_init(task_queue* q, int capacity);
 
-// Create new task if queue not empty
-void task_queue_push(task_queue* q, task t);
+// Push
+void task_queue_push(task_queue* q, future* f);
 
-// Remove task from the queue
-task task_queue_pop(task_queue* q);
+// Pop
+future* task_queue_pop(task_queue* q);
 
 //==================================
-// Pool
+// Thread Pool
 //==================================
 typedef struct {
     pthread_t* threads;
@@ -45,13 +56,13 @@ typedef struct {
     bool stop;
 } pool;
 
-// Initialize a thread pool
+// Init
 void pool_init(pool* target_pool, int thread_count, int queue_capacity);
 
-// Adds a new task to the pool
-void pool_run(pool* p, void (*function)(void*), void* arg);
+// Run
+future* pool_run(pool* p, void* (*function)(void*), void* arg, bool temporary);
 
-// Waits for all tasks in queue to end and shuts down
+// Shutdown
 void pool_shutdown(pool* p);
 
 #endif
