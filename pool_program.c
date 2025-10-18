@@ -24,9 +24,13 @@ void print_list(int list[], int length) {
 int next_prime(int number) {
     while (true) {
         number = number + 1;
+
+        if (number <= 2) return 2;
+        if (number % 2 == 0) continue;
+
         int i = 2;
         while (i <= number) {
-            if (i == number) return i;
+            if (i > number / 2) return number;
 
             // If the number is divisible by any number other than 1 or itself, it is not prime
             else if ((number % i) == 0) break;

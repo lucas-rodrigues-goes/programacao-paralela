@@ -9,17 +9,28 @@ void* next_prime(void* arg) {
     int number = *(int*)arg;
 
     while (true) {
-        number++;
+        number = number + 1;
+
+        if (number <= 2) {
+            // Allocate memory for the result
+            int* result = malloc(sizeof(int));
+            *result = 2;
+            return result; // Return pointer to result for future
+        }
+        if (number % 2 == 0) continue;
+
         int i = 2;
         while (i <= number) {
-            if (i == number) {
+            if (i > number / 2) {
                 // Allocate memory for the result
                 int* result = malloc(sizeof(int));
-                *result = i;
+                *result = number;
                 return result; // Return pointer to result for future
             }
+
+            // If the number is divisible by any number other than 1 or itself, it is not prime
             else if ((number % i) == 0) break;
-            i++;
+            i = i + 1;
         }
     }
 }
